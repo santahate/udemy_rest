@@ -27,4 +27,3 @@ class ManagementCommandTest(TestCase):
             mocked.side_effect = [OperationalError] * 5 + [True]
             call_command('wait_for_db')
             self.assertEqual(mocked.call_count, 6)
-
