@@ -6,10 +6,9 @@ class ModelTests(TestCase):
     """
     Test models here
     """
-    def test_create_user_with_email_successfully(self) -> None:
+    def test_create_user_with_email_successfully(self):
         """
         Test creating user with email
-        :return: None
         """
         email = 'test@mail.com'
         password = 'TestPass123'
@@ -21,10 +20,9 @@ class ModelTests(TestCase):
         self.assertEqual(user.email, email)
         self.assertTrue(user.check_password(password))
 
-    def test_new_user_email_normalized(self) -> None:
+    def test_new_user_email_normalized(self):
         """
         Test new user email is normalized (should be case-insensitive)
-        :return: None
         """
         email = 'test@MYSITE.COM'
         user = get_user_model().objects.create_user(
@@ -33,3 +31,11 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(user.email, email.lower())
+
+    def test_new_user_invalid_email(self):
+        """
+        Test creating user with empty email raises error
+        """
+        with self.assertRaises(ValueError):
+            get_user_model().objects.create_user(email='', password='123')
+            get_user_model().objects.create_user(email=None, password='123')
