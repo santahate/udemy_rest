@@ -20,3 +20,16 @@ class ModelTests(TestCase):
 
         self.assertEqual(user.email, email)
         self.assertTrue(user.check_password(password))
+
+    def test_new_user_email_normalized(self) -> None:
+        """
+        Test new user email is normalized (should be case-insensitive)
+        :return: None
+        """
+        email = 'test@MYSITE.COM'
+        user = get_user_model().objects.create_user(
+            email=email,
+            password='123'
+        )
+
+        self.assertEqual(user.email, email.lower())

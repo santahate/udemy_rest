@@ -1,6 +1,7 @@
 from typing import Optional
 
-from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser, \
+    BaseUserManager
 from django.db import models
 
 
@@ -12,6 +13,7 @@ class UserManager(BaseUserManager):
         """
         Creates and saves new user
         """
+        email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
