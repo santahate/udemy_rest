@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
+ME_URL = reverse('user:me')
 
 
 def create_user(**kwargs):
@@ -131,3 +132,62 @@ class PublicUserApiTests(TestCase):
         response = self.client.post(TOKEN_URL, payload)
         self.assertNotIn('token', response.data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_user_unauthorized(self):
+        """
+        Test auth is required for users
+        """
+        response = self.client.get(ME_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateUserApiTests(TestCase):
+    """
+    Test user API endpoints that require auth
+    """
+    def setUp(self):
+        self.user = create_user(
+            email='email@mail.com',
+            password='password321',
+            name='name'
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_retrieve_profile(self):
+        """
+        Test retrieve profile for logged in user
+        """
+        response = self.client.get(ME_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {
+            'name': self.user.name,
+            'email': self.user.email,
+        })
+
+    def test_post_me_not_allowed(self):
+        """
+        Test POST method is not allowed on ME_URL
+        """
+        response = self.client.post(ME_URL, {})
+
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_udpate_user_profile(self):
+        """
+        Test updating user profile
+        """
+        payload = {
+            'name': 'new_name',
+            'password': 'new_password'
+        }
+
+        response = self.client.patch(ME_URL, payload)
+
+        self.user.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.user.name, payload['name'])
+        self.assertIs(self.user.check_password(payload['password']), True)
