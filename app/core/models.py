@@ -57,3 +57,17 @@ class Tag(Model):
 
     def __str__(self):
         return self.name
+
+
+class Ingredient(Model):
+    """
+    Represent user's ingredient
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
